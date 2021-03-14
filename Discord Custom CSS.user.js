@@ -2,6 +2,7 @@
 // @name         Discord Custom CSS
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/Discord%20Custom%20CSS.user.js
+// @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/Discord%20Custom%20CSS.user.js
 // @version      0.2
 // @description  Lets you use BetterDiscord-style custom CSS in browser Discord
 // @author       Chami
