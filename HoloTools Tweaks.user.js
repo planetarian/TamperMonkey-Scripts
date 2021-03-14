@@ -2,6 +2,7 @@
 // @name         HoloTools Tweaks
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/HoloTools%20Tweaks.user.js
+// @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/HoloTools%20Tweaks.user.js
 // @version      0.2
 // @description  Tweaks to HoloTools' stream player, etc.
 // @author       Chami
