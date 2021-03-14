@@ -25,7 +25,8 @@
 
 
 #app-mount {
-    background: url("https://raw.githubusercontent.com/planetarian/DiscordThemes/master/Assets/bg_6desdiv01.png");
+    /* doesn't work */
+    /* background: url(""); */
     background-position: center;
     background-size: cover;
 }
