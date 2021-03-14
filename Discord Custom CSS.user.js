@@ -8,6 +8,9 @@
 // @grant        GM_addStyle
 // ==/UserScript==
 
+// NOTE: This CSS is old, and a few parts of it no longer work as intended due to discord changes (e.g. background image).
+// Overall, it's pretty much intact, though.
+
 (function() {
     'use strict';
     GM_addStyle(`
