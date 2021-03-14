@@ -2,12 +2,13 @@
 // @name         KC3 Replayer Log Fixer
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/KC3%20Replayer%20Log%20Fixer.user.js
+// @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/KC3%20Replayer%20Log%20Fixer.user.js
 // @version      0.2
 // @description  makes the battle log actually readable.
 // @author       Chami
 // @match        https://kc3kai.github.io/kancolle-replay/battleText.html
 // @grant        GM_addStyle
-// @require http://code.jquery.com/jquery-latest.js
+// @require      http://code.jquery.com/jquery-latest.js
 // ==/UserScript==
 
 (function() {
