@@ -2,6 +2,7 @@
 // @name         YouTube Emoji Streamliner
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/edit/main/YouTube%20Emoji%20Streamliner.user.js
+// @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/edit/main/YouTube%20Emoji%20Streamliner.user.js
 // @version      0.2
 // @description  Hopefully make the emoji panel less annoying?
 // @author       Chami
