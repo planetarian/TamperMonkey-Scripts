@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         YouTube Emoji Streamliner
 // @namespace    http://piro.moe
-// @version      0.1
+// @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/edit/main/YouTube%20Emoji%20Streamliner.user.js
+// @version      0.2
 // @description  Hopefully make the emoji panel less annoying?
 // @author       Chami
 // @match        https://*.youtube.com/*
@@ -24,4 +25,6 @@
     GM_addStyle("yt-button-renderer #button.yt-button-renderer { height: 32px; }");
     // Remove the emote search box
     GM_addStyle("#search-panel.yt-emoji-picker-renderer { display: none; }");
+    // Make ytcFilter's resize grabber easier to grab (can grab the transparent space below it)
+    GM_addStyle("#ytc-filter .vc-resize, #ytc-filter hr.resize { height: 10px; position: absolute; }");
 })();
