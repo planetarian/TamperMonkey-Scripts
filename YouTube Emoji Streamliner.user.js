@@ -3,7 +3,7 @@
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/edit/main/YouTube%20Emoji%20Streamliner.user.js
 // @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/edit/main/YouTube%20Emoji%20Streamliner.user.js
-// @version      0.2
+// @version      0.3
 // @description  Hopefully make the emoji panel less annoying?
 // @author       Chami
 // @match        https://*.youtube.com/*
@@ -26,6 +26,8 @@
     GM_addStyle("yt-button-renderer #button.yt-button-renderer { height: 32px; }");
     // Remove the emote search box
     GM_addStyle("#search-panel.yt-emoji-picker-renderer { display: none; }");
+    // Make the emoji picker not take up so much vertical space
+    GM_addStyle("yt-emoji-picker-renderer.yt-live-chat-message-input-renderer { min-height: 50px; max-height: 15vh; }");
     // Make ytcFilter's resize grabber easier to grab (can grab the transparent space below it)
     GM_addStyle("#ytc-filter .vc-resize, #ytc-filter hr.resize { height: 10px; position: absolute; }");
 })();
