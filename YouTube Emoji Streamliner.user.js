@@ -3,7 +3,7 @@
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YouTube%20Emoji%20Streamliner.user.js
 // @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YouTube%20Emoji%20Streamliner.user.js
-// @version      0.4.2
+// @version      0.4.3
 // @description  Hopefully make the emoji panel less annoying?
 // @author       Chami
 // @match        https://*.youtube.com/*
@@ -33,4 +33,6 @@
     // Maximize the chat panel to fill vertical space
     ['load', 'scroll'].forEach(m => window.addEventListener(m, e => document.body.classList[window.scrollY ? 'remove' : 'add']('unscrolled'), false));
     GM_addStyle("body.unscrolled:not([no-scroll]) ytd-watch-flexy[is-two-columns_]:not([fullscreen]):not([theater]) iframe#chatframe { position: fixed; top: 60px; bottom: 0; margin-left: -25px; max-width: 450px; height: calc(100% - 60px); z-index: 2200; }");
+    // Prevent channel names from showing over chat
+    GM_addStyle("html.efyt-control-bar-visible #secondary-inner ytd-live-chat-frame { z-index: 301 !important; }");
 })();
