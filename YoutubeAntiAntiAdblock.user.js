@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name         Youtube Embedder
+// @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.2
+// @version      0.3
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/watch*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
-// @updateUrl    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
-// @downloadUrl  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
+// @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
+// @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
 // @grant        none
 // ==/UserScript==
 
