@@ -2,7 +2,7 @@
 // @name         Youtube Embedder
 // @namespace    http://github.com/planetarian/
 // @version      0.1
-// @description  try to take over the world!
+// @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/watch*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
