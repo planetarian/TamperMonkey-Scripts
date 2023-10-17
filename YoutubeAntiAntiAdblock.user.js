@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.5
+// @version      0.6
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/watch*
@@ -14,12 +14,14 @@
 (function() {
     'use strict';
 
+    // get the video ID of the video currently being watched
     function youtube_parser(url){
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
         var match = url.match(regExp);
         return (match&&match[7].length==11)? match[7] : false;
     }
 
+    // replace the youtube player with the embed
     function replacePlayer(videoId) {
         // movie_player contains all the player controls, get rid of them and replace with the embed
         const player = document.getElementById('movie_player');
