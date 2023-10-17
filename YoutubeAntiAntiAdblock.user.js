@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.8
+// @version      0.9
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/*
@@ -29,9 +29,9 @@
     function replacePlayer(videoId) {
         // movie_player contains all the player controls, get rid of them and replace with the embed
         const existingPlayer = document.getElementsByClassName('html5-video-player');
-        const existingEmbed = document.getElementById('aab-embed');
-        if (existingPlayer.length == 0 && !existingEmbed) {
+        if (existingPlayer.length == 0 && !embed) {
             // We're still loading the initial page; do nothing
+            log("page loading; skipping.");
             return false;
         }
 
@@ -54,13 +54,15 @@
         // if there's no html5 player (anti-adblock present)
         else {
             log("no html5 player present. adding embed.");
+            const src = `https://www.youtube.com/embed/${videoId}`;
             if (embed) {
+                embed.src = src;
                 player.innerHtml = '';
                 player.appendChild(embed);
             }
             else {
                 // replace the player
-                player.innerHTML = `<iframe id="aab-embed" width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}"></iframe>`;
+                player.innerHTML = `<iframe id="aab-embed" width="100%" height="100%" src="${src}"></iframe>`;
                 embed = document.getElementById('aab-embed');
             }
             console.log("YouTube player replaced with embed iframe.");
