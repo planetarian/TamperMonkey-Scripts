@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.6
+// @version      0.7
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
-// @match        https://www.youtube.com/watch*
+// @match        https://www.youtube.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
 // @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
@@ -24,7 +24,7 @@
     // replace the youtube player with the embed
     function replacePlayer(videoId) {
         // movie_player contains all the player controls, get rid of them and replace with the embed
-        const player = document.getElementById('movie_player');
+        const player = document.getElementById('ytd-player');
         if (!player) return false;
 
         // replace the player
@@ -58,6 +58,7 @@
         if (stage >= 2) return;
         for (const mutation of mutationList) {
             if (mutation.type === "childList") {
+                console.log(`Anti-anti-adblock reacting to element mutation. Stage ${stage}`);
                 if (stage === 0) {
                     // looking for the main player container
                     const playerContainer = document.getElementById('player');
