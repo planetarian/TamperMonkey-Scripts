@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.4
+// @version      0.5
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/watch*
@@ -20,30 +20,67 @@
         return (match&&match[7].length==11)? match[7] : false;
     }
 
+    function replacePlayer(videoId) {
+        // movie_player contains all the player controls, get rid of them and replace with the embed
+        const player = document.getElementById('movie_player');
+        if (!player) return false;
+
+        // replace the player
+        player.innerHTML = `<iframe id="aab-embed" width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}"></iframe>`;
+        console.log("YouTube player replaced with embed iframe.");
+        return true;
+    }
+
+    // stop player when the user navigates away from a video
+    document.addEventListener("yt-navigate-start", function(event) {
+        const embed = document.getElementById('aab-embed');
+        if (!embed) return;
+        embed.remove();
+    });
+
+    // replace player again after the user navigates to a new video
+    document.addEventListener("yt-navigate-finish", function(event) {
+        const videoId = youtube_parser(document.location.href);
+        if (!videoId) return;
+        replacePlayer(videoId);
+    });
+
+    // set up the mutation observer to monitor for when the player is added
     const pageManager = document.getElementById('page-manager');
     const pageObserver = new MutationObserver(pageMutated);
     pageObserver.observe(pageManager, { childList: true });
 
-    var modified = false;
+    var stage = 0;
 
     function pageMutated(mutationList, observer) {
-        if (modified) return;
+        if (stage >= 2) return;
         for (const mutation of mutationList) {
             if (mutation.type === "childList") {
-                const playerContainer = document.getElementById('player');
-                if (!playerContainer) continue;
+                if (stage === 0) {
+                    // looking for the main player container
+                    const playerContainer = document.getElementById('player');
+                    if (!playerContainer) continue;
 
-                // remove the notice
-                const errorOverlay = document.getElementById('error-screen');
-                errorOverlay.parentElement.removeChild(errorOverlay);
+                    // remove the notice
+                    const errorOverlay = document.getElementById('error-screen');
+                    errorOverlay.remove();
 
-                // replace the player
-                const player = document.getElementById('ytd-player');
-                const videoId = youtube_parser(document.location.href);
-                player.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}"></iframe>`;
-                modified = true;
-                pageObserver.disconnect();
-                console.log("YouTube player replaced with embed iframe.");
+                    // the actual player itself hasn't been added yet
+                    // so we need to monitor the element it'll be added to
+                    const playerEl = playerContainer.getElementsByClassName('ytd-player')[0];
+                    pageObserver.disconnect();
+                    stage = 1;
+                    pageObserver.observe(playerEl, { childList: true });
+                }
+                else if (stage === 1) {
+                    // should have the player ready to replace now
+                    const videoId = youtube_parser(document.location.href);
+                    if (!videoId) continue;
+                    if (!replacePlayer(videoId)) continue;
+
+                    pageObserver.disconnect();
+                    stage = 2;
+                }
             }
         }
     }
