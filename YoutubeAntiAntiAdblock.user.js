@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.11
+// @version      0.12
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/*
@@ -33,6 +33,15 @@ body
         console.log("AAB: " + message);
     }
 
+    function callPlayer(func, args) {
+        if (!embed) return;
+        embed.contentWindow.postMessage(JSON.stringify({
+            'event': 'command',
+            'func': func,
+            'args': args || []
+        }), '*');
+    }
+
     // get the video ID of the video currently being watched
     function youtube_parser(url){
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -41,7 +50,7 @@ body
     }
 
     // replace the youtube player with the embed
-    function replacePlayer(videoId) {
+    function replacePlayer(videoId, timestamp) {
         // movie_player contains all the player controls, get rid of them and replace with the embed
         const player = document.getElementById('movie_player');
         if (!player && !embed) {
@@ -75,7 +84,12 @@ body
                 errorOverlay.remove();
                 log("error overlay removed.");
             }
-            const src = `https://www.youtube.com/embed/${videoId}`;
+            var src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+            if (!!timestamp && timestamp.length) {
+                let time = timestamp[0]
+                time = time.replace(/s$/, '');
+                src += `&start=${time}`
+            }
             if (embed) {
                 embed.src = src;
                 player.innerHtml = '';
@@ -83,9 +97,10 @@ body
             }
             else {
                 // replace the player
-                player.innerHTML = `<iframe id="aab-embed" width="100%" height="100%" src="${src}"></iframe>`;
+                player.innerHTML = `<iframe id="aab-embed" width="100%" height="100%" src="${src}" allow="autoplay"></iframe>`;
                 embed = document.getElementById('aab-embed');
             }
+            callPlayer('playVideo');
             log("YouTube player replaced with embed iframe.");
             return true;
         }
@@ -93,13 +108,15 @@ body
 
     // replace player again after the user navigates to a new video
     document.addEventListener("yt-navigate-finish", function(event) {
+        stage = 0;
         // clear the embed if we've added it already
         const embed = document.getElementById('aab-embed');
         if (embed) embed.remove();
         // replace the video on the new page
         const videoId = youtube_parser(document.location.href);
         if (!videoId) return;
-        replacePlayer(videoId);
+        const url = new URL(document.location.href);
+        replacePlayer(videoId, url.searchParams.getAll('t'));
     });
 
     // unhide the player container stuff in case anti-adblock hid it
@@ -107,6 +124,10 @@ body
 
     // hold onto the embed for later reference
     var embed = null;
+
+    const descObserver = new MutationObserver(textContainersMutated);
+    const commentsObserver = new MutationObserver(commentsContainerMutated);
+    const textObserver = new MutationObserver(textContainersMutated);
 
     // set up the mutation observer to monitor for when the player is added
     const pageManager = document.getElementById('page-manager');
@@ -116,13 +137,15 @@ body
         pageObserver.observe(pageManager, { childList: true });
     }
     catch (error) {
-        console.error("couldn't observe page manager.");
+        log("couldn't observe page manager.");
     }
 
     var stage = 0;
+    const observingTag = 'aab-observing';
 
     function pageMutated(mutationList, observer) {
         if (stage >= 2) return;
+
         for (const mutation of mutationList) {
             if (mutation.type === "childList") {
                 log(`anti-anti-adblock reacting to element mutation. Stage ${stage}`);
@@ -134,6 +157,7 @@ body
                         continue;
                     }
 
+                    addTextObservers();
 
                     // the actual player itself hasn't been added yet
                     // so we need to monitor the element it'll be added to
@@ -153,9 +177,8 @@ body
                         log("not a video page.");
                         continue;
                     }
-                    if (!replacePlayer(videoId)) {
-                        continue;
-                    }
+                    const url = new URL(document.location.href);
+                    if (!replacePlayer(videoId, url.searchParams.getAll('t'))) continue;
 
                     pageObserver.disconnect();
                     stage = 2;
@@ -163,4 +186,73 @@ body
             }
         }
     }
+
+    function addTextObservers() {
+        const desc = document.querySelectorAll('#description-inline-expander yt-attributed-string')[0];
+        if (desc && !desc.classList.contains(observingTag)) {
+            try {
+                log("observing video description.");
+                descObserver.observe(desc, { childList: true });
+                desc.classList.add(observingTag);
+            }
+            catch (error) {
+                log("couldn't observe video description.");
+                console.error(error);
+            }
+        }
+
+        const comments = document.querySelectorAll('#comments')[0];
+        if (comments && !comments.classList.contains(observingTag)) {
+            try {
+                log("observing comments section.");
+                commentsObserver.observe(comments, { childList: true });
+                comments.classList.add(observingTag);
+            }
+            catch (error) {
+                log("couldn't observe comments section.");
+                console.error(error);
+            }
+        }
+    }
+
+    function commentsContainerMutated(mutationList, observer) {
+        log("comments section mutated.");
+        for (const mutation of mutationList) {
+            const comments = document.querySelectorAll('#comments > #sections > #contents')[0];
+            textObserver.observe(comments, { childList: true });
+        }
+    }
+
+    function textContainersMutated(mutationList, observer) {
+        for (const mutation of mutationList) {
+            for (let i = 0; i < Array.from(mutation.addedNodes).length; i++) {
+                const node = mutation.addedNodes[i];
+                const links = node.querySelectorAll('#comment #body #comment-content #content-text a');
+                if (!links.length) continue;
+
+                for (let l = 0; l < links.length; l++) {
+                    const link = links[l];
+                    const taggedClass = 'aab-link';
+                    if (link.classList.contains(taggedClass)) continue;
+
+                    link.classList.add(taggedClass);
+                    const matches = /(?:(?<hh>\d\d?):)?(?<mm>\d\d?):(?<ss>\d\d?)/.exec(link.innerText);
+                    if (!matches) continue;
+
+                    let timestamp = (Number(matches.groups.mm)*60)+Number(matches.groups.ss);
+                    if (matches.groups.hh > 0) {
+                        timestamp += Number(matches.groups.hh) * 60 * 60;
+                    }
+
+                    log(`found timestamp ${timestamp}`);
+                    link.addEventListener('click', (ev) => {
+                        log(timestamp);
+                        callPlayer('playVideo');
+                        callPlayer('seekTo', [timestamp]);
+                    });
+                }
+            }
+        }
+    }
+
 })();
