@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.10
+// @version      0.11
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/*
@@ -16,13 +16,13 @@
 YT player locations:
 
 body
-  > #player > #player-wrap > #player-api > #movie_player > .html5-video-container > video
+  > #player > #player-wrap > #player-api
   > ytd-app > #content > #page-manager > ytd-watch-flexy
     > #full-bleed-container
-    > #columns > #primary > #primary-inner > #player > #player-container-outer > #player-container-inner
-      > #player-container > #ytd-player
-        > #container > .html5-video-player > .html5-video-container > video
-        > #aab-embed
+    > #columns > #primary > #primary-inner > #player > #player-container-outer > #player-container-inner > #container
+      > #player-container > #ytd-player > #container
+        > #movie_player > .html5-video-container > video //before
+        > #movie_player > #aab-embed                     //after
 
 */
 
@@ -43,43 +43,32 @@ body
     // replace the youtube player with the embed
     function replacePlayer(videoId) {
         // movie_player contains all the player controls, get rid of them and replace with the embed
-        const existingPlayer = document.getElementsByClassName('html5-video-player');
-        if (existingPlayer.length == 0 && !embed) {
+        const player = document.getElementById('movie_player');
+        if (!player && !embed) {
             // We're still loading the initial page; do nothing
             log("page loading; skipping.");
             return false;
         }
 
-        const player = document.getElementById('ytd-player');
-        if (!player) {
-            log("no player container found.");
-            return false;
+        log("checking for video player.");
+        const videoEls = player.getElementsByClassName('html5-main-video');
+
+        if (videoEls.length > 1) {
+            log("there seem to be multiple video players?");
         }
 
-        log("checking for video player.");
-        let videoEls = player.getElementsByClassName('html5-main-video');
-        if (videoEls.length == 0) {
-            // fetch the virtual player used sometimes
-            const virtualContainer = document.getElementById('movie_player');
-            if (virtualContainer) {
-                videoEls = virtualContainer.getElementsByClassName('html5-main-video');
-            }
-        }
         // if we have an html5 player (no anti-adblock)
-        if (videoEls.length >= 1 && !!videoEls[0].src) {
-            if (videoEls.length >= 2) {
-                log("there seem to be multiple video players?");
-            }
+        if (videoEls.length > 0 && !!videoEls[0].src) {
             log("html5 player present. using that instead.");
             if (embed) {
                 log("removing embed.");
                 embed.remove();
+                embed = undefined;
             }
         }
         // if there's no html5 player (anti-adblock present)
         else {
             log("no html5 player present. adding embed.");
-
             // remove the notice
             const errorOverlay = document.getElementById('error-screen');
             if (errorOverlay) {
@@ -102,15 +91,12 @@ body
         }
     }
 
-    // stop player when the user navigates away from a video
-    document.addEventListener("yt-navigate-start", function(event) {
-        const embed = document.getElementById('aab-embed');
-        if (!embed) return;
-        embed.remove();
-    });
-
     // replace player again after the user navigates to a new video
     document.addEventListener("yt-navigate-finish", function(event) {
+        // clear the embed if we've added it already
+        const embed = document.getElementById('aab-embed');
+        if (embed) embed.remove();
+        // replace the video on the new page
         const videoId = youtube_parser(document.location.href);
         if (!videoId) return;
         replacePlayer(videoId);
