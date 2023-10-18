@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Anti-anti-adblock
 // @namespace    http://github.com/planetarian/TamperMonkey-Scripts
-// @version      0.9
+// @version      0.10
 // @description  Replaces the youtube video player with a youtube embed iframe to subvert the anti-adblock measures.
 // @author       Chami
 // @match        https://www.youtube.com/*
@@ -10,6 +10,21 @@
 // @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/YoutubeAntiAntiAdblock.user.js
 // @grant        GM_addStyle
 // ==/UserScript==
+
+/*
+
+YT player locations:
+
+body
+  > #player > #player-wrap > #player-api > #movie_player > .html5-video-container > video
+  > ytd-app > #content > #page-manager > ytd-watch-flexy
+    > #full-bleed-container
+    > #columns > #primary > #primary-inner > #player > #player-container-outer > #player-container-inner
+      > #player-container > #ytd-player
+        > #container > .html5-video-player > .html5-video-container > video
+        > #aab-embed
+
+*/
 
 (function() {
     'use strict';
@@ -42,9 +57,19 @@
         }
 
         log("checking for video player.");
-        const videoEls = player.getElementsByClassName('html5-main-video');
+        let videoEls = player.getElementsByClassName('html5-main-video');
+        if (videoEls.length == 0) {
+            // fetch the virtual player used sometimes
+            const virtualContainer = document.getElementById('movie_player');
+            if (virtualContainer) {
+                videoEls = virtualContainer.getElementsByClassName('html5-main-video');
+            }
+        }
         // if we have an html5 player (no anti-adblock)
-        if (videoEls.length == 1 && !!videoEls[0].src) {
+        if (videoEls.length >= 1 && !!videoEls[0].src) {
+            if (videoEls.length >= 2) {
+                log("there seem to be multiple video players?");
+            }
             log("html5 player present. using that instead.");
             if (embed) {
                 log("removing embed.");
@@ -54,6 +79,13 @@
         // if there's no html5 player (anti-adblock present)
         else {
             log("no html5 player present. adding embed.");
+
+            // remove the notice
+            const errorOverlay = document.getElementById('error-screen');
+            if (errorOverlay) {
+                errorOverlay.remove();
+                log("error overlay removed.");
+            }
             const src = `https://www.youtube.com/embed/${videoId}`;
             if (embed) {
                 embed.src = src;
@@ -65,7 +97,7 @@
                 player.innerHTML = `<iframe id="aab-embed" width="100%" height="100%" src="${src}"></iframe>`;
                 embed = document.getElementById('aab-embed');
             }
-            console.log("YouTube player replaced with embed iframe.");
+            log("YouTube player replaced with embed iframe.");
             return true;
         }
     }
@@ -116,12 +148,6 @@
                         continue;
                     }
 
-                    // remove the notice
-                    const errorOverlay = document.getElementById('error-screen');
-                    if (errorOverlay) {
-                        errorOverlay.remove();
-                        log("error overlay removed.");
-                    }
 
                     // the actual player itself hasn't been added yet
                     // so we need to monitor the element it'll be added to
