@@ -3,7 +3,7 @@
 // @namespace    http://piro.moe
 // @updateURL    https://github.com/planetarian/TamperMonkey-Scripts/raw/main/Discord%20Custom%20CSS.user.js
 // @downloadURL  https://github.com/planetarian/TamperMonkey-Scripts/raw/main/Discord%20Custom%20CSS.user.js
-// @version      0.3
+// @version      0.3.1
 // @description  Lets you use BetterDiscord-style custom CSS in browser Discord
 // @author       Chami
 // @match        https://discord.com/*
@@ -42,7 +42,7 @@ section[class^="panels_"] {
 }
 
 section[class^="panels_"] div[class^="container__"] {
-    padding: 4px;
+    padding: 4px 4px 4px 6px;
 }
 
 div[class^="typing_"] {
