@@ -1,9 +1,10 @@
 /* ==UserStyle==
 @name           Discord Improved UI
-@namespace      https://github.com/planetarian/TamperMonkey-Scripts
+@namespace      https://github.com/planetarian
 @version        1.0.0
 @description    Makes discord UI more compact and a bit more desktop-friendly
-@author         Chami
+@author         Chami (https://github.com/planetarian)
+@homepageURL    https://github.com/planetarian/TamperMonkey-Scripts
 ==/UserStyle== */
 @-moz-document domain("discord.com") {
     [aria-label="Send a gift"] {
